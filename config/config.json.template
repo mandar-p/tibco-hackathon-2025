@@ -1,0 +1,28 @@
+{
+  "server": {
+    "port": 8080,
+    "host": "localhost"
+  },
+  "anthropic": {
+    "api_url": "https://api.anthropic.com/v1/messages",
+    "api_key": "your-anthropic-api-key-here",
+    "model": "claude-sonnet-4-20250514",
+    "version": "2023-06-01",
+    "beta": "files-api-2025-04-14",
+    "file_id": "your-tibco-documentation-file-id",
+    "max_tokens": 1024
+  },
+  "bwdesign": {
+    "executable_path": "/path/to/bwdesign",
+    "workspace_path": "/path/to/workspace",
+    "project_output_path": "/path/to/projects"
+  },
+  "git": {
+    "url": "https://github.com/yourusername/yourrepo.git",
+    "token": "your-git-token-here"
+  },
+  "file_paths": {
+    "commands_file": "./data/commands.txt",
+    "log_file": "./data/execution.log"
+  }
+}
