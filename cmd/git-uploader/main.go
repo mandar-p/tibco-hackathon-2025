@@ -39,12 +39,33 @@ func uploadToGit() error {
 		return fmt.Errorf("project directory does not exist: %s", projectPath)
 	}
 
-	log.Printf("Uploading project from: %s", projectPath)
+	log.Printf("Uploading BWCE project from: %s", projectPath)
 	log.Printf("Git URL: %s", gitURL)
 
-	// Change to project directory
-	if err := os.Chdir(projectPath); err != nil {
-		return fmt.Errorf("failed to change to project directory: %v", err)
+	// Get the current working directory (should be the TIBCOpilot repo root)
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("failed to get current directory: %v", err)
+	}
+
+	// Create BWProject subdirectory in the current repo
+	bwProjectDir := filepath.Join(currentDir, "BWProject")
+	if err := os.MkdirAll(bwProjectDir, 0755); err != nil {
+		return fmt.Errorf("failed to create BWProject directory: %v", err)
+	}
+
+	log.Printf("Created BWProject directory: %s", bwProjectDir)
+
+	// Copy all files from project directory to BWProject subdirectory
+	if err := copyDirectory(projectPath, bwProjectDir); err != nil {
+		return fmt.Errorf("failed to copy project files: %v", err)
+	}
+
+	log.Println("Copied BWCE project files to BWProject subdirectory")
+
+	// Change to the repo root directory
+	if err := os.Chdir(currentDir); err != nil {
+		return fmt.Errorf("failed to change to repo directory: %v", err)
 	}
 
 	// Check if git is already initialized
@@ -55,26 +76,26 @@ func uploadToGit() error {
 		}
 	}
 
-	// Add all files
-	log.Println("Adding files to Git...")
-	if err := runGitCommand("add", "."); err != nil {
-		return fmt.Errorf("failed to add files: %v", err)
+	// Add BWProject files to Git
+	log.Println("Adding BWProject files to Git...")
+	if err := runGitCommand("add", "BWProject/"); err != nil {
+		return fmt.Errorf("failed to add BWProject files: %v", err)
 	}
 
 	// Check if there are any changes to commit
-	output, err := exec.Command("git", "status", "--porcelain").Output()
+	output, err := exec.Command("git", "status", "--porcelain", "BWProject/").Output()
 	if err != nil {
 		return fmt.Errorf("failed to check git status: %v", err)
 	}
 
 	if len(strings.TrimSpace(string(output))) == 0 {
-		log.Println("No changes to commit")
+		log.Println("No changes to commit in BWProject")
 		return nil
 	}
 
 	// Commit changes
-	commitMessage := fmt.Sprintf("Auto-commit from TIBCOpilot at %s", time.Now().Format("2006-01-02 15:04:05"))
-	log.Printf("Committing changes: %s", commitMessage)
+	commitMessage := fmt.Sprintf("Add generated BWCE project at %s", time.Now().Format("2006-01-02 15:04:05"))
+	log.Printf("Committing BWCE project: %s", commitMessage)
 	if err := runGitCommand("commit", "-m", commitMessage); err != nil {
 		return fmt.Errorf("failed to commit: %v", err)
 	}
@@ -86,11 +107,79 @@ func uploadToGit() error {
 	}
 
 	// Push to remote
-	log.Println("Pushing to remote repository...")
-	if err := runGitCommand("push", "-u", "origin", "main"); err != nil {
+	log.Println("Pushing BWCE project to remote repository...")
+	if err := runGitCommand("push", "origin", "main"); err != nil {
 		// Try with master if main fails
-		if err := runGitCommand("push", "-u", "origin", "master"); err != nil {
+		if err := runGitCommand("push", "origin", "master"); err != nil {
 			return fmt.Errorf("failed to push to remote: %v", err)
+		}
+	}
+
+	return nil
+}
+
+func copyDirectory(srcDir, destDir string) error {
+	return filepath.Walk(srcDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Get relative path from source directory
+		relPath, err := filepath.Rel(srcDir, path)
+		if err != nil {
+			return err
+		}
+
+		// Skip hidden files and directories
+		if strings.HasPrefix(info.Name(), ".") {
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		destPath := filepath.Join(destDir, relPath)
+
+		if info.IsDir() {
+			return os.MkdirAll(destPath, info.Mode())
+		}
+
+		// Copy file
+		return copyFile(path, destPath)
+	})
+}
+
+func copyFile(src, dst string) error {
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer sourceFile.Close()
+
+	// Create destination directory if needed
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		return err
+	}
+
+	destFile, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+
+	// Copy file contents
+	buf := make([]byte, 4096)
+	for {
+		n, err := sourceFile.Read(buf)
+		if err != nil && err.Error() != "EOF" {
+			return err
+		}
+		if n == 0 {
+			break
+		}
+
+		if _, err := destFile.Write(buf[:n]); err != nil {
+			return err
 		}
 	}
 

@@ -49,5 +49,9 @@ config/config-*.json
 data/commands.txt
 data/execution.log
 
+# Generated BWCE projects (keep structure but not contents)
+BWProject/*/
+!BWProject/.gitkeep
+
 # Keep only template files
 !config/*.template

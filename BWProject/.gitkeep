@@ -1,0 +1,18 @@
+# BWProject Directory
+
+This directory contains generated TIBCO BWCE projects created by the TIBCO Co-Pilot.
+
+## Structure
+Each generated project will be placed in its own subdirectory with a timestamp or project name.
+
+## Usage
+Generated projects are automatically:
+- Created by the executor module
+- Organized by the git-uploader module  
+- Committed to the repository with descriptive messages
+
+## Generated Content
+- Complete TIBCO BWCE application structure
+- Process definitions and activity configurations
+- Project metadata and build configurations
+- Ready-to-deploy integration artifacts
