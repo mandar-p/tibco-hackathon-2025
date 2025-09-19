@@ -55,3 +55,19 @@ BWProject/*/
 
 # Keep only template files
 !config/*.template
+
+# Configuration files with secrets
+config/config.json
+config/config-*.json
+
+# Test files with API keys
+simple-api-test.yaml
+*-test.yaml
+*test*.yml
+*.test.json
+
+# Environment files
+.env
+.env.*
+*.key
+*.secret
