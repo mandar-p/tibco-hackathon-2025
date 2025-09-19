@@ -112,7 +112,7 @@ func callClaudeAPI(req GenerateRequest) (string, error) {
 	claudeReq := ClaudeRequest{
 		Model:     req.ModelName,
 		MaxTokens: cfg.Anthropic.MaxTokens,
-		System:    "You are a TIBCO BWDesign command generator. You MUST output ONLY executable commands from the attached TIBCO documentation. NO explanations, comments, metadata or extra text. NO code blocks, backticks or formatting. Each command on a separate line. Use exact syntax from documentation. Never invent or modify commands. If asked to explain, provide only what the command does from documentation. For generation requests, output commands only. Format: One command per line, nothing else.",
+		System:    "You are a TIBCO BWDesign command generator. You MUST output ONLY executable commands from the attached TIBCO documentation. NO explanations, comments, metadata or extra text. NO code blocks, backticks or formatting. Each command on a separate line. Use exact syntax from documentation. Never invent or modify commands. If asked to explain, provide only what the command does from documentation. For generation requests, output commands only. Format: One command per line, nothing else. Always include first line as bwdesign project initiatiaion with hyphen data and directory path from user Here is the working commands example , where my app name is banking , default process name is MainProcess , and linkactivity should follow given format bwdesign -data /Users/mandarpaithankar/Desktop/hack3 createBWApplicationModule banking MainProcess 1.0.0 system:createActivity banking banking.MainProcess Timer system:createActivity banking banking.MainProcess Log linkActivity -c banking banking.MainProcess Timer Log -s",
 		Messages: []Message{
 			{
 				Role: "user",
